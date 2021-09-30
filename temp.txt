@@ -1,1 +1,9 @@
-temp. Made because github is weird
+EPA Slides Notes:
+They averaged their data to 24 hours. Interesting
+What is 90% completeness threshold? 
+They removed points if over threshold 24 hours
+Should I use their equation for correction?
+
+Correlation paper:
+For correlation, this assumes no lag. How do we input lag?
+Interesting to use graphs for correlation. Maybe we can shift for lag?

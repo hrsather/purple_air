@@ -1,0 +1,13 @@
+Notes from Sep 9th meeting
+
+higher pollution at night
+
+want to use mobile sensors. 20 mins at a time
+
+PM = particulate matter
+
+20 microns and higher is bad
+
+Use kriging methods
+
+Denver rotates air a lot. Try outwards
