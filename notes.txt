@@ -1,13 +1,51 @@
 Notes from Sep 9th meeting
-
 higher pollution at night
-
 want to use mobile sensors. 20 mins at a time
-
 PM = particulate matter
-
 20 microns and higher is bad
-
 Use kriging methods
-
 Denver rotates air a lot. Try outwards
+
+
+EPA Slides Notes:
+They averaged their data to 24 hours. Interesting
+What is 90% completeness threshold? 
+They removed points if over threshold 24 hours
+Should I use their equation for correction?
+
+Correlation paper:
+For correlation, this assumes no lag. How do we input lag?
+Interesting to use graphs for correlation. Maybe we can shift for lag?
+
+
+
+
+# Steps for cleaning data:
+
+1. Remove all obvious outliers (Where there is a single spike of 300 or more. Can also compare channels A and B)
+2. Round datetime to nearest 10 minutes
+3. Average all 10 minute times  
+Question: Will this be alright or do we want to create a better method
+
+# Steps for coorelation clustering
+There is no python package that does this. Would this work?
+1. Clean the data
+2. Normalize the data. Make the mean zero and variance one
+3. Find the correlation of each of the sensors. O(n^2)
+4. Use standard clustering after this. Complete linkage, probably.
+
+Then, display via gps coordinates to visualize correlations.  
+Will this work?
+
+TODO:  
+Use A-B sensor info for outliers.  
+Make 2 minute intervals.  DONE  
+Avg left and right DONE
+
+Try standardized and non-standardized clustering data.
+
+Cross-correlation lagged functions.
+
+Use ATM DONE
+
+Air now sensors comparison. EPA Sensors
