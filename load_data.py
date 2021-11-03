@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+import global_vars as gv
 
 
 def get_filename_info(filename):
@@ -42,7 +43,8 @@ def get_raw_data(directory="data"):
     return data_df
 
 
-def remove_outliers(df, ppm_name, cutoff=300):
+def remove_outliers(df, cutoff=300):
+    ppm_name = gv.ppm_name
     previous_value = df[ppm_name].iloc[0]
     for i in range(len(df[ppm_name]) - 1):
         current_value = df[ppm_name].iloc[i]
@@ -55,9 +57,9 @@ def remove_outliers(df, ppm_name, cutoff=300):
     return df
 
 
-def merge_a_b(df_a, df_b, date_name):
-    merged = df_a.merge(df_b, how="outer", on=date_name)
-    merged = merged.sort_values(by=date_name)
+def merge_a_b(df_a, df_b):
+    merged = df_a.merge(df_b, how="outer", on=gv.date_name)
+    merged = merged.sort_values(by=gv.date_name)
     # Take first
     col_names = ["location", "inside_outside"]
     for col_name in col_names:
@@ -73,7 +75,7 @@ def merge_a_b(df_a, df_b, date_name):
     return merged
 
 
-def load_data(date_name, ppm_name, directory="data", recompute=False, pkl_name="data.pkl"):
+def load_data(directory="data", recompute=False, pkl_name="data.pkl"):
     if not recompute:
         return pd.read_pickle(pkl_name)
 
@@ -85,14 +87,14 @@ def load_data(date_name, ppm_name, directory="data", recompute=False, pkl_name="
         if location[-1].strip() == "B":
             continue
         location_df_a = raw_data[raw_data["location"] == location]
-        location_df_a = location_df_a.groupby(date_name, as_index=False).agg(agg_func)
-        location_df_a = remove_outliers(location_df_a, ppm_name)
+        location_df_a = location_df_a.groupby(gv.date_name, as_index=False).agg(agg_func)
+        location_df_a = remove_outliers(location_df_a)
 
         location_df_b = raw_data[raw_data["location"] == location + " B"]
-        location_df_b = location_df_b.groupby(date_name, as_index=False).agg(agg_func)
-        location_df_b = remove_outliers(location_df_b, ppm_name)
+        location_df_b = location_df_b.groupby(gv.date_name, as_index=False).agg(agg_func)
+        location_df_b = remove_outliers(location_df_b)
 
-        location_df = merge_a_b(location_df_a, location_df_b, date_name)
+        location_df = merge_a_b(location_df_a, location_df_b, gv.date_name)
         data = data.append(location_df)
 
     data.to_pickle(pkl_name)

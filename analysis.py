@@ -1,14 +1,15 @@
 import numpy as np
+import global_vars as gv
 
 
-def get_rmse(data, name_a, name_b, date_name, ppm_name):
+def get_rmse(data, name_a, name_b):
     df_a = data[data["location"] == name_a]
     df_b = data[data["location"] == name_b]
 
     # Drop na and zero ppm values
-    merged_df = df_a.merge(df_b, on=[date_name])
-    ppm_x_name = ppm_name + "_x"
-    ppm_y_name = ppm_name + "_y"
+    merged_df = df_a.merge(df_b, on=[gv.date_name])
+    ppm_x_name = gv.ppm_name + "_x"
+    ppm_y_name = gv.ppm_name + "_y"
     merged_df = merged_df[merged_df[ppm_x_name] > 0]
     merged_df = merged_df[merged_df[ppm_y_name] > 0]
     merged_df.dropna(subset=[ppm_x_name, ppm_y_name])
