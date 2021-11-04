@@ -97,5 +97,8 @@ def load_data(directory="data", recompute=False, pkl_name="data.pkl"):
         location_df = merge_a_b(location_df_a, location_df_b, gv.date_name)
         data = data.append(location_df)
 
+    # Drop broken entry
+    data = data[data["location"] != "Bear Valley Visitor Center"]
+
     data.to_pickle(pkl_name)
     return data
