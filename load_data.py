@@ -94,7 +94,7 @@ def load_data(directory="data", recompute=False, pkl_name="data.pkl"):
         location_df_b = location_df_b.groupby(gv.date_name, as_index=False).agg(agg_func)
         location_df_b = remove_outliers(location_df_b)
 
-        location_df = merge_a_b(location_df_a, location_df_b, gv.date_name)
+        location_df = merge_a_b(location_df_a, location_df_b)
         data = data.append(location_df)
 
     # Drop broken entry
