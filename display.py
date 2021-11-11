@@ -83,5 +83,4 @@ def map_correlations(data, reference_location):
     plt.title("Comparisons with " + reference_location)
     plt.xticks([])
     plt.yticks([])
-    plt.savefig("output.png")
     plt.show()

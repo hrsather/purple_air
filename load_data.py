@@ -1,5 +1,6 @@
 import os
 import pandas as pd
+
 import global_vars as gv
 
 
@@ -76,7 +77,7 @@ def merge_a_b(df_a, df_b):
 
 def load_data(directory="data", recompute=False, pkl_name="data.pkl"):
     if not recompute:
-        return pd.read_pickle(pkl_name)
+        return pd.read_pickle(os.path.join("pkls", pkl_name))
 
     raw_data = get_raw_data(directory)
 
@@ -99,5 +100,5 @@ def load_data(directory="data", recompute=False, pkl_name="data.pkl"):
     # Drop broken entry
     data = data[data["location"] != "Bear Valley Visitor Center"]
 
-    data.to_pickle(pkl_name)
+    data.to_pickle(os.path.join("pkls", pkl_name))
     return data
