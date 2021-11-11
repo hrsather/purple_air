@@ -1,4 +1,7 @@
 # Global variables to be imported to other files
 
-ppm_name = "PM2.5_ATM_ug/m3"
-date_name = "created_at"
+PPM_NAME = "PM2.5_ATM_ug/m3"
+DATE_NAME = "created_at"
+
+DAYS_STEP = 2
+DAYS_LOOKBACK = 120

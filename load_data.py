@@ -44,14 +44,13 @@ def get_raw_data(directory="data"):
 
 
 def remove_outliers(df, cutoff=300):
-    ppm_name = gv.ppm_name
-    previous_value = df[ppm_name].iloc[0]
-    for i in range(len(df[ppm_name]) - 1):
-        current_value = df[ppm_name].iloc[i]
-        next_value = df[ppm_name].iloc[i + 1]
+    previous_value = df[gv.PPM_NAME].iloc[0]
+    for i in range(len(df[gv.PPM_NAME]) - 1):
+        current_value = df[gv.PPM_NAME].iloc[i]
+        next_value = df[gv.PPM_NAME].iloc[i + 1]
         if (current_value - previous_value > cutoff or
             current_value - next_value > cutoff):  # Too big of difference
-            df[ppm_name].iloc[i] = previous_value
+            df[gv.PPM_NAME].iloc[i] = previous_value
         else:
             previous_value = (current_value + next_value) / 2
     return df
