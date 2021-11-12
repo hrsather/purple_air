@@ -8,23 +8,17 @@ import os
 import display as ds
 
 
-def get_rmse(data, location_a, location_b):
-    df_a = data[data["location"] == location_a]
-    df_b = data[data["location"] == location_b]
+""" This function returns the correlation of the PPM between two locations.
+        This serves as a helper function for get_cor_df, which accepts dataframes
 
-    # Drop na and zero ppm values
-    merged_df = df_a.merge(df_b, on=[gv.DATE_NAME])
-    ppm_x_name = gv.PPM_NAME + "_x"
-    ppm_y_name = gv.PPM_NAME + "_y"
-    merged_df = merged_df[merged_df[ppm_x_name] > 0]
-    merged_df = merged_df[merged_df[ppm_y_name] > 0]
-    merged_df.dropna(subset=[ppm_x_name, ppm_y_name])
+    Args:
+        data: The purple air dataframe.
+        name_a: The name of the first location.
+        name_b: The name of the second location.
 
-    merged_df["squared_error"] = np.square(merged_df[ppm_x_name] - merged_df[ppm_y_name])
-
-    return np.sqrt(merged_df["squared_error"].mean())
-
-
+    Returns:
+        The correlation of the PPM from the dataframe between the two locations.
+"""
 def get_cor(data, name_a, name_b):
     df_a = data[data["location"] == name_a]
     df_b = data[data["location"] == name_b]
@@ -32,6 +26,15 @@ def get_cor(data, name_a, name_b):
     return get_cor_df(df_a, df_b)
 
 
+""" This function returns the correlation of the PPM between two dataframes.
+
+    Args:
+        df_a: The dataframe of the first location.
+        df_b: The dataframe of the second location.
+
+    Returns:
+        The correlation of the PPM from the dataframe between the two dataframes.
+"""
 def get_cor_df(df_a, df_b):
     # Merge both dfs on date and get corr of both ppm's
     merged_df = df_a.merge(df_b, on=[gv.DATE_NAME])
@@ -43,6 +46,22 @@ def get_cor_df(df_a, df_b):
     return corr
 
 
+""" This function finds what the optimal lag is for two locations to have the
+        highest correlation to eachother. Then it returns that lag along with its
+        optimal correlation.
+
+    Args:
+        data: The purple air dataframe.
+        recalculate (optional): If True, this recalculates the optimal correlation
+            and lags, then saves them as pkls in the pkls directory. If False, this
+            loads the already computed pkls and returns them.
+        location_to_show (optional): If passed a reference location, it will display the
+            correlation given different values of lag for all the other locations to the reference.
+            recalculate must be True
+
+    Returns:
+        The optimal correlations, the corresponding optimal lags.
+"""
 def get_corr_lag(data, recalculate=False, location_to_show=""):
     if not recalculate:
         with open(os.path.join("pkls", "corr.pkl"), "rb") as fp:
@@ -51,8 +70,8 @@ def get_corr_lag(data, recalculate=False, location_to_show=""):
             lags =  pickle.load(fp)
         return differences, lags
 
-    all_best_coors = []
-    all_lags = []
+    optimal_corr_matrix = []
+    lag_matrix = []
     for reference_location in np.unique(data["location"]):
         reference_df = data[data["location"] == reference_location]
         best_coors = []
@@ -63,7 +82,7 @@ def get_corr_lag(data, recalculate=False, location_to_show=""):
             corr_list = []
             for difference in range(-gv.DAYS_LOOKBACK, gv.DAYS_LOOKBACK, gv.DAYS_STEP):
                 selected_df_copy = selected_df.copy(deep=True)
-                selected_df_copy[gv.date_name] = selected_df_copy[gv.date_name] + pd.Timedelta(difference, "m")
+                selected_df_copy[gv.DATE_NAME] = selected_df_copy[gv.DATE_NAME] + pd.Timedelta(difference, "m")
                 
                 corr = get_cor_df(reference_df, selected_df_copy)
                 corr_list.append(corr)
@@ -78,18 +97,32 @@ def get_corr_lag(data, recalculate=False, location_to_show=""):
             lag = 2 * corr_list.index(best_diff) - gv.DAYS_LOOKBACK
             lags.append(lag)
 
-        all_best_coors.append(best_coors)
-        all_lags.append(lags)
+        optimal_corr_matrix.append(best_coors)
+        lag_matrix.append(lags)
 
     with open(os.path.join("pkls", "corr.pkl"), "wb") as fp:
-        pickle.dump(all_best_coors, fp)
+        pickle.dump(optimal_corr_matrix, fp)
 
     with open(os.path.join("pkls", "lags.pkl"), "wb") as fp:
-        pickle.dump(all_lags, fp)
+        pickle.dump(lag_matrix, fp)
         
-    return all_best_coors, all_lags
+    return optimal_corr_matrix, lag_matrix
 
 
+""" This function maps and displays the optimal lags from each sensor to the reference sensor
+        overlayed on a geographic map of the location. This function is similar to display_map_max_corr,
+        except for this displays the lags.
+
+    Note: There is probably a smart way to merge this with display_map_lag because they are so similar
+
+    Args:
+        data: The purple air dataframe.
+        reference_location: The location of which to refererence all the optimal lags to.
+        lag_matrix: The lag matrix, given by function get_corr_lag.
+
+    Returns:
+        Nothing. Displays a plot.
+"""
 def display_map_lag(data, reference_location, lag_matrix):
     image = ds.load_img(data, new=False)
 
@@ -115,6 +148,7 @@ def display_map_lag(data, reference_location, lag_matrix):
         height = image.size[1]
         lat = height - height * (lat - min_lat) / (max_lat - min_lat)
 
+        # NOTE: 0.5 and 0.7 were determined by experimentation and seemed to give the best results for resizing the image
         lat = int(0.7 * (lat - height / 2) + height / 2)
         long = int(0.5 * (long - width / 2) + width / 2)
 
@@ -137,6 +171,20 @@ def display_map_lag(data, reference_location, lag_matrix):
     plt.show()
 
 
+""" This function maps and displays the optimal correlations from each sensor to the reference sensor
+        overlayed on a geographic map of the location. This function is similar to display_map_lag,
+        except for this displays the optimal correlations.
+
+    Note: There is probably a smart way to merge this with display_map_lag because they are so similar
+
+    Args:
+        data: The purple air dataframe.
+        reference_location: The location of which to refererence all the optimal lags to.
+        correlation_matrix: The correlation_matrix matrix, given by function get_corr_lag.
+
+    Returns:
+        Nothing. Displays a plot.
+"""
 def display_map_max_corr(data, reference_location, correlation_matrix):
     image = ds.load_img(data, new=False)
 
@@ -162,6 +210,7 @@ def display_map_max_corr(data, reference_location, correlation_matrix):
         height = image.size[1]
         lat = height - height * (lat - min_lat) / (max_lat - min_lat)
 
+        # NOTE: 0.5 and 0.7 were determined by experimentation and seemed to give the best results for resizing the image
         lat = int(0.7 * (lat - height / 2) + height / 2)
         long = int(0.5 * (long - width / 2) + width / 2)
 

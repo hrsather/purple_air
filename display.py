@@ -9,6 +9,18 @@ from datetime import datetime
 import analysis as ana
 
 
+""" This function uses the MapQuest API, described further in the README, to download an image of the
+        geographic area of interest, defiend by a bounding box.
+
+    Args:
+        data: The purple air dataframe.
+        new (optional): If True, it redownloads the image from the API and saves it to the images directory.
+            If False, it loads an image img_name from the images directory.
+        img_name (optional): The name of the image to load from the images directory if new == False.
+
+    Returns:
+        Nothing. Displays a plot.
+"""
 def load_img(data, new=False, img_name="correct.jpg"):
     if new:
         min_lat = np.min(data["lat"])
@@ -38,6 +50,19 @@ def load_img(data, new=False, img_name="correct.jpg"):
     return Image.open("images/" + img_name)
 
 
+""" This function maps and displays the optimal lags from each sensor to the reference sensor
+        overlayed on a geographic map of the location. This function is similar to display_map_max_corr,
+        except for this image doesn't map the maximum correlation score over all different lags, just
+        the instantaneous lag of 0.
+
+    Args:
+        data: The purple air dataframe.
+        reference_location: The location of which to refererence all the optimal lags to.
+        lag_matrix: The lag matrix, given by function get_corr_lag.
+
+    Returns:
+        Nothing. Displays a plot.
+"""
 def map_correlations(data, reference_location):
     map_overlay = load_img(data, new=False)
 
