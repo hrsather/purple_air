@@ -189,9 +189,9 @@ def display_map_max_corr(data, reference_location, correlation_matrix):
     image = ds.load_img(data, new=False)
 
     plt.figure(dpi=1200)
-    color_map = plt.cm.PuOr
+    color_map = plt.cm.get_cmap('viridis').reversed()
     plt.imshow(image, cmap=color_map)
-    plt.clim(-1, 1)
+    plt.clim(0, 1)
     plt.colorbar()
 
     for location in np.unique(data["location"]):
